@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Access Review Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      background: #4b2e83;
+      color: white;
+      padding: 20px;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .info {
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .search-box {
+      width: 300px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th {
+      background: #4b2e83;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background: #f5f5f5;
+    }
+
+    .comment-box {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .submit-btn {
+      margin-top: 20px;
+      background: #4b2e83;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .submit-btn:hover {
+      background: #392267;
+    }
+
+    .revoke-btn {
+      background: #e7f5ea;
+      color: #1f7a3f;
+      border: 1px solid #1f7a3f;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .revoke-btn.revoke-active {
+      background: #ffebeb;
+      color: #c62828;
+      border: 1px solid #c62828;
+    }
+
+    .revoke-btn:hover {
+      opacity: 0.9;
+    }
+
+    .status-bar {
+      margin-bottom: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .revoke-row {
+      background: #ffeaea !important;
+    }
+
+    .footer {
+      margin-top: 30px;
+      color: #888;
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Access Review Management</h1>
+    <div>Manager: manager@symphony.net.th</div>
+    <div>Division: IT</div>
+  </div>
+
+  <div class="container">
+
+    <div class="card">
+      <div class="title">User Access Review</div>
+      <div class="info">Review user access permissions and revoke unnecessary access.</div>
+    </div>
+
+    <input type="text" id="searchInput" class="search-box" placeholder="Search EmpID / User / System..." onkeyup="filterTable()">
+
+    <div class="status-bar" id="reviewCounter">
+      Pending Review: 0 รายการ
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <button class="submit-btn" style="margin-right:10px;" onclick="showTab('ERP')">ERP</button>
+      <button class="submit-btn" style="margin-right:10px;" onclick="showTab('VPN')">VPN</button>
+      <button class="submit-btn" style="margin-right:10px;" onclick="showTab('SAP')">SAP</button>
+      <button class="submit-btn" onclick="showTab('ALL')">ALL SYSTEMS</button>
+    </div>
+
+    <div id="ERP" class="system-tab">
+      <div class="card">
+        <div class="title">ERP Role Review</div>
+
+        <table id="accessTableERP">
+          <thead>
+            <tr>
+              <th>EmpID</th>
+              <th>User Email</th>
+              <th>Department</th>
+              <th>Role / Permission</th>
+              <th>Access Decision</th>
+              <th>Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>EMP001</td>
+              <td>user1@symphony.net.th</td>
+              <td>IT</td>
+              <td>ERP Admin</td>
+              <td style="text-align:center">
+                <button class="revoke-btn" onclick="toggleRevoke(this)">Keep Access</button>
+              </td>
+              <td>
+                <input type="text" class="comment-box" placeholder="Comment..." onkeyup="updateCounter()">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="VPN" class="system-tab" style="display:none;">
+      <div class="card">
+        <div class="title">VPN Role Review</div>
+
+        <table id="accessTableVPN">
+          <thead>
+            <tr>
+              <th>EmpID</th>
+              <th>User Email</th>
+              <th>Department</th>
+              <th>Role / Permission</th>
+              <th>Access Decision</th>
+              <th>Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>EMP001</td>
+              <td>user1@symphony.net.th</td>
+              <td>IT</td>
+              <td>VPN Remote Access</td>
+              <td style="text-align:center">
+                <button class="revoke-btn" onclick="toggleRevoke(this)">Keep Access</button>
+              </td>
+              <td>
+                <input type="text" class="comment-box" placeholder="Comment..." onkeyup="updateCounter()">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="SAP" class="system-tab" style="display:none;">
+      <div class="card">
+        <div class="title">SAP Role Review</div>
+
+        <table id="accessTableSAP">
+          <thead>
+            <tr>
+              <th>EmpID</th>
+              <th>User Email</th>
+              <th>Department</th>
+              <th>Role / Permission</th>
+              <th>Access Decision</th>
+              <th>Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>EMP002</td>
+              <td>user2@symphony.net.th</td>
+              <td>Finance</td>
+              <td>SAP Finance User</td>
+              <td style="text-align:center">
+                <button class="revoke-btn" onclick="toggleRevoke(this)">Keep Access</button>
+              </td>
+              <td>
+                <input type="text" class="comment-box" placeholder="Comment..." onkeyup="updateCounter()">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="submitReview()">
+      Submit Review
+    </button>
+
+    <div class="footer">
+      Access Review Management System - UAR Portal
+    </div>
+
+  </div>
+
+  <script>
+
+    function toggleRevoke(button) {
+      const row = button.closest('tr');
+
+      if(button.classList.contains('revoke-active')) {
+        button.classList.remove('revoke-active');
+        button.innerText = 'Keep Access';
+        row.classList.remove('revoke-row');
+      } else {
+        button.classList.add('revoke-active');
+        button.innerText = 'Remove Access';
+        row.classList.add('revoke-row');
+      }
+
+      updateCounter();
+    }
+
+    function updateCounter() {
+      const rows = document.querySelectorAll('#accessTable tbody tr');
+      let count = 0;
+
+      rows.forEach(row => {
+        const revokeButton = row.querySelector('.revoke-btn');
+        const isRevoked = revokeButton.classList.contains('revoke-active');
+
+        if (isRevoked || comment.value.trim() !== '') {
+          count++;
+        }
+      });
+
+      document.getElementById('reviewCounter').innerText =
+        'Pending Review: ' + count + ' รายการ';
+    }
+
+    function submitReview() {
+      const rows = document.querySelectorAll('#accessTable tbody tr');
+      const results = [];
+
+      rows.forEach(row => {
+        const empid = row.cells[0].innerText;
+        const user = row.cells[1].innerText;
+        const department = row.cells[2].innerText;
+        const system = row.cells[3].innerText;
+        const revoke = row.querySelector('.revoke-btn').classList.contains('revoke-active');
+        const comment = row.querySelector('.comment-box').value;
+
+        if (revoke || comment.trim() !== '') {
+          results.push({
+            EmpID: empid,
+            UserEmail: user,
+            Department: department,
+            SystemName: system,
+            Revoke: revoke,
+            Comment: comment,
+            ActionDate: new Date().toISOString()
+          });
+        }
+      });
+
+      if (results.length === 0) {
+        alert('ไม่มีรายการที่ต้อง Submit');
+        return;
+      }
+
+      console.log('Submit Payload:', results);
+
+      alert('บันทึกข้อมูลเรียบร้อย');
+    }
+
+    function showTab(systemName) {
+      const tabs = document.querySelectorAll('.system-tab');
+
+      tabs.forEach(tab => {
+        tab.style.display = 'none';
+      });
+
+      if(systemName === 'ALL') {
+        tabs.forEach(tab => {
+          tab.style.display = 'block';
+        });
+      } else {
+        document.getElementById(systemName).style.display = 'block';
+      }
+    }
+
+    function filterTable() {
+      const input = document.getElementById('searchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('#accessTable tbody tr');
+
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+
+        if (text.includes(input)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+  </script>
+
+</body>
+</html>
