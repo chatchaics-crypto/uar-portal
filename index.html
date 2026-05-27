@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Access Review Management</title>
+  <title>UAR Portal</title>
+
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f9;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f3f2f1;
       margin: 0;
-      padding: 0;
+      color: #323130;
     }
 
     .header {
-      background: #4b2e83;
+      background: #0f6cbd;
       color: white;
       padding: 20px;
     }
@@ -24,39 +25,88 @@
 
     .card {
       background: white;
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     }
 
     .title {
       font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 10px;
+      font-weight: 600;
+      margin-bottom: 8px;
     }
 
     .info {
-      color: #666;
-      margin-bottom: 5px;
+      color: #605e5c;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-box,
+    .sort-select {
+      padding: 10px;
+      border: 1px solid #c8c6c4;
+      border-radius: 6px;
+      background: white;
     }
 
     .search-box {
-      width: 300px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      width: 320px;
+    }
+
+    .status-bar {
+      font-weight: 600;
+    }
+
+    .system-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
       margin-bottom: 20px;
+    }
+
+    .system-tab-btn,
+    .submit-btn {
+      background: #0f6cbd;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .system-tab-btn:hover,
+    .submit-btn:hover {
+      background: #115ea3;
+    }
+
+    .system-complete {
+      background: #107c10 !important;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      background: white;
     }
 
     th {
-      background: #4b2e83;
+      background: #0f6cbd;
       color: white;
       padding: 12px;
       text-align: left;
@@ -65,75 +115,135 @@
 
     td {
       padding: 10px;
-      border-bottom: 1px solid #ddd;
-      font-size: 14px;
+      border-bottom: 1px solid #edebe9;
+      vertical-align: middle;
     }
 
     tr:hover {
-      background: #f5f5f5;
+      background: #faf9f8;
+    }
+
+    .role-badge {
+      display: inline-block;
+      background: #e5f1fb;
+      color: #0f548c;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
     }
 
     .comment-box {
       width: 100%;
-      padding: 6px;
-      border: 1px solid #ccc;
+      padding: 8px;
+      border: 1px solid #c8c6c4;
       border-radius: 4px;
-    }
-
-    .submit-btn {
-      margin-top: 20px;
-      background: #4b2e83;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .submit-btn:hover {
-      background: #392267;
     }
 
     .revoke-btn {
       background: #e7f5ea;
-      color: #1f7a3f;
-      border: 1px solid #1f7a3f;
+      color: #107c10;
+      border: 1px solid #107c10;
       padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 13px;
-      font-weight: bold;
+      font-weight: 600;
     }
 
-    .revoke-btn.revoke-active {
-      background: #ffebeb;
-      color: #c62828;
-      border: 1px solid #c62828;
-    }
-
-    .revoke-btn:hover {
-      opacity: 0.9;
-    }
-
-    .status-bar {
-      margin-bottom: 15px;
-      font-weight: bold;
-      color: #333;
+    .revoke-active {
+      background: #fde7e9 !important;
+      color: #c50f1f !important;
+      border-color: #c50f1f !important;
     }
 
     .revoke-row {
-      background: #ffeaea !important;
+      background: #fff4f4 !important;
+    }
+
+    .submitted-row {
+      background: #edf7ed !important;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .page-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .page-btn {
+      background: #0f6cbd;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .page-btn:disabled {
+      background: #c8c6c4;
+      cursor: not-allowed;
+    }
+
+    #confirmModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      width: 360px;
+      padding: 24px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .cancel-btn {
+      background: #f3f2f1;
+      color: #323130;
+      border: 1px solid #c8c6c4;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .draft-status {
+      font-size: 13px;
+      color: #107c10;
+      font-weight: 600;
+      margin-left: 10px;
     }
 
     .footer {
       margin-top: 30px;
-      color: #888;
-      font-size: 12px;
       text-align: center;
+      color: #8a8886;
+      font-size: 12px;
     }
   </style>
 </head>
+
 <body>
 
   <div class="header">
@@ -146,52 +256,112 @@
 
     <div class="card">
       <div class="title">User Access Review</div>
-      <div class="info">Review user access permissions and revoke unnecessary access.</div>
+      <div class="info">
+        Review user access permissions and mark unnecessary access for removal.
+      </div>
     </div>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="Search EmpID / User / System..." onkeyup="filterTable()">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <input
+          type="text"
+          id="searchInput"
+          class="search-box"
+          placeholder="Search EmpID / Name / Role"
+          onkeyup="filterTable()"
+        />
 
-    <div class="status-bar" id="reviewCounter">
-      Pending Review: 0 รายการ
+        <select
+          id="globalSortSelect"
+          class="sort-select"
+          onchange="sortCurrentTab(this.value)"
+        >
+          <option value="empid">Sort by EmpID</option>
+          <option value="name">Sort by Name</option>
+          <option value="section">Sort by Section</option>
+        </select>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="status-bar" id="reviewCounter">
+          Pending Review: 0 รายการ
+        </div>
+
+        <div class="draft-status" id="draftStatus">
+          Draft not saved
+        </div>
+      </div>
     </div>
 
-    <div style="margin-bottom:20px;">
-      <button class="submit-btn" style="margin-right:10px;" onclick="showTab('ERP')">ERP</button>
-      <button class="submit-btn" style="margin-right:10px;" onclick="showTab('VPN')">VPN</button>
-      <button class="submit-btn" style="margin-right:10px;" onclick="showTab('SAP')">SAP</button>
-      <button class="submit-btn" onclick="showTab('ALL')">ALL SYSTEMS</button>
+    <div class="system-tabs">
+      <button class="system-tab-btn" data-system="ERP" onclick="showTab('ERP')">
+        ERP
+      </button>
+
+      <button class="system-tab-btn" data-system="VPN" onclick="showTab('VPN')">
+        VPN
+      </button>
+
+      <button class="system-tab-btn" data-system="SAP" onclick="showTab('SAP')">
+        SAP
+      </button>
+
+      <button class="system-tab-btn" data-system="M365" onclick="showTab('M365')">
+        Microsoft 365
+      </button>
+
+      <button id="allSystemsBtn" class="system-tab-btn" data-system="ALL" onclick="showTab('ALL')">
+        ALL SYSTEMS
+      </button>
     </div>
 
     <div id="ERP" class="system-tab">
       <div class="card">
         <div class="title">ERP Role Review</div>
 
-        <table id="accessTableERP">
+        <table>
           <thead>
             <tr>
               <th>EmpID</th>
-              <th>User Email</th>
-              <th>Department</th>
+              <th>Name / Surname</th>
+              <th>Section</th>
               <th>Role / Permission</th>
-              <th>Access Decision</th>
+              <th>Review Action</th>
               <th>Comment</th>
             </tr>
           </thead>
+
           <tbody>
             <tr>
               <td>EMP001</td>
-              <td>user1@symphony.net.th</td>
-              <td>IT</td>
-              <td>ERP Admin</td>
-              <td style="text-align:center">
-                <button class="revoke-btn" onclick="toggleRevoke(this)">Keep Access</button>
+              <td>John Smith</td>
+              <td>Infrastructure Team</td>
+              <td><span class="role-badge">ERP Admin</span></td>
+              <td>
+                <button class="revoke-btn" onclick="toggleRevoke(this)">
+                  No Action
+                </button>
               </td>
               <td>
-                <input type="text" class="comment-box" placeholder="Comment..." onkeyup="updateCounter()">
+                <input
+                  type="text"
+                  class="comment-box"
+                  placeholder="Comment..."
+                  onkeyup="updateCounter()"
+                />
               </td>
             </tr>
           </tbody>
         </table>
+
+        <div class="pagination">
+          <div>Showing 1-100 of 1 records</div>
+
+          <div class="page-buttons">
+            <button class="page-btn" disabled>Previous</button>
+            <button class="page-btn" disabled>Next</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -199,32 +369,49 @@
       <div class="card">
         <div class="title">VPN Role Review</div>
 
-        <table id="accessTableVPN">
+        <table>
           <thead>
             <tr>
               <th>EmpID</th>
-              <th>User Email</th>
-              <th>Department</th>
+              <th>Name / Surname</th>
+              <th>Section</th>
               <th>Role / Permission</th>
-              <th>Access Decision</th>
+              <th>Review Action</th>
               <th>Comment</th>
             </tr>
           </thead>
+
           <tbody>
             <tr>
-              <td>EMP001</td>
-              <td>user1@symphony.net.th</td>
-              <td>IT</td>
-              <td>VPN Remote Access</td>
-              <td style="text-align:center">
-                <button class="revoke-btn" onclick="toggleRevoke(this)">Keep Access</button>
+              <td>EMP002</td>
+              <td>Jane Doe</td>
+              <td>Cyber Security</td>
+              <td><span class="role-badge">VPN Privileged Access</span></td>
+              <td>
+                <button class="revoke-btn" onclick="toggleRevoke(this)">
+                  No Action
+                </button>
               </td>
               <td>
-                <input type="text" class="comment-box" placeholder="Comment..." onkeyup="updateCounter()">
+                <input
+                  type="text"
+                  class="comment-box"
+                  placeholder="Comment..."
+                  onkeyup="updateCounter()"
+                />
               </td>
             </tr>
           </tbody>
         </table>
+
+        <div class="pagination">
+          <div>Showing 1-100 of 1 records</div>
+
+          <div class="page-buttons">
+            <button class="page-btn" disabled>Previous</button>
+            <button class="page-btn" disabled>Next</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -232,38 +419,143 @@
       <div class="card">
         <div class="title">SAP Role Review</div>
 
-        <table id="accessTableSAP">
+        <table>
           <thead>
             <tr>
               <th>EmpID</th>
-              <th>User Email</th>
-              <th>Department</th>
+              <th>Name / Surname</th>
+              <th>Section</th>
               <th>Role / Permission</th>
-              <th>Access Decision</th>
+              <th>Review Action</th>
               <th>Comment</th>
             </tr>
           </thead>
+
           <tbody>
             <tr>
-              <td>EMP002</td>
-              <td>user2@symphony.net.th</td>
+              <td>EMP003</td>
+              <td>Michael Tan</td>
               <td>Finance</td>
-              <td>SAP Finance User</td>
-              <td style="text-align:center">
-                <button class="revoke-btn" onclick="toggleRevoke(this)">Keep Access</button>
+              <td><span class="role-badge">SAP Finance User</span></td>
+              <td>
+                <button class="revoke-btn" onclick="toggleRevoke(this)">
+                  No Action
+                </button>
               </td>
               <td>
-                <input type="text" class="comment-box" placeholder="Comment..." onkeyup="updateCounter()">
+                <input
+                  type="text"
+                  class="comment-box"
+                  placeholder="Comment..."
+                  onkeyup="updateCounter()"
+                />
               </td>
             </tr>
           </tbody>
         </table>
+
+        <div class="pagination">
+          <div>Showing 1-100 of 1 records</div>
+
+          <div class="page-buttons">
+            <button class="page-btn" disabled>Previous</button>
+            <button class="page-btn" disabled>Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="M365" class="system-tab" style="display:none;">
+      <div class="card">
+        <div class="title">Microsoft 365 Review</div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>EmpID</th>
+              <th>Name / Surname</th>
+              <th>Section</th>
+              <th>Role / Permission</th>
+              <th>Review Action</th>
+              <th>Comment</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>EMP004</td>
+              <td>David Lee</td>
+              <td>Collaboration Team</td>
+              <td><span class="role-badge">Teams Administrator</span></td>
+              <td>
+                <button class="revoke-btn" onclick="toggleRevoke(this)">
+                  No Action
+                </button>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="comment-box"
+                  placeholder="Comment..."
+                  onkeyup="updateCounter()"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          <div>Showing 1-100 of 1 records</div>
+
+          <div class="page-buttons">
+            <button class="page-btn" disabled>Previous</button>
+            <button class="page-btn" disabled>Next</button>
+          </div>
+        </div>
       </div>
     </div>
 
     <button class="submit-btn" onclick="submitReview()">
-      Submit Review
+      Submit Current Tab Review
     </button>
+
+    <div id="allSystemsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
+      <div class="modal-content">
+        <h3>Warning</h3>
+
+        <p>
+          กรุณาเลือก review ทีละระบบ<br />
+          ไม่สามารถ Submit จาก ALL SYSTEMS ได้
+        </p>
+
+        <div class="modal-buttons">
+          <button class="submit-btn" onclick="closeAllSystemsModal()">
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="confirmModal">
+      <div class="modal-content">
+        <h3>Confirm Review</h3>
+
+        <p>
+          ไม่มีการเปลี่ยนแปลงรายการ<br />
+          ต้องการ Submit Review ทั้งหมดหรือไม่?
+        </p>
+
+        <div class="modal-buttons">
+          <button class="submit-btn" onclick="confirmSubmitAll()">
+            Confirm
+          </button>
+
+          <button class="cancel-btn" onclick="closeConfirmModal()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
 
     <div class="footer">
       Access Review Management System - UAR Portal
@@ -273,31 +565,147 @@
 
   <script>
 
+    let currentTab = 'ERP';
+
+    function showTab(systemName) {
+      console.log('Current Tab:', systemName);
+
+      currentTab = systemName;
+
+      const tabs = document.querySelectorAll('.system-tab');
+
+      tabs.forEach(tab => {
+        tab.style.display = 'none';
+      });
+
+      if (systemName === 'ALL') {
+        tabs.forEach(tab => {
+          tab.style.display = 'block';
+        });
+      } else {
+        const selectedTab = document.getElementById(systemName);
+
+        if (selectedTab) {
+          selectedTab.style.display = 'block';
+        }
+      }
+    }
+
+    function saveDraft() {
+      const draftData = {};
+
+      document.querySelectorAll('.system-tab').forEach(system => {
+        const systemId = system.id;
+        draftData[systemId] = [];
+
+        const rows = system.querySelectorAll('tbody tr');
+
+        rows.forEach((row, index) => {
+          const revoke = row.querySelector('.revoke-btn')
+            .classList.contains('revoke-active');
+
+          const comment = row.querySelector('.comment-box').value;
+
+          draftData[systemId].push({
+            rowIndex: index,
+            revoke,
+            comment
+          });
+        });
+      });
+
+      localStorage.setItem('uarDraftData', JSON.stringify(draftData));
+
+      const now = new Date();
+      const timeText = now.toLocaleTimeString();
+
+      document.getElementById('draftStatus').innerText =
+        'Draft Saved • ' + timeText;
+    }
+
+    function loadDraft() {
+      const draft = localStorage.getItem('uarDraftData');
+
+      if (!draft) {
+        return;
+      }
+
+      const draftData = JSON.parse(draft);
+
+      Object.keys(draftData).forEach(systemId => {
+        const system = document.getElementById(systemId);
+
+        if (!system) {
+          return;
+        }
+
+        const rows = system.querySelectorAll('tbody tr');
+
+        draftData[systemId].forEach(item => {
+          const row = rows[item.rowIndex];
+
+          if (!row) {
+            return;
+          }
+
+          const button = row.querySelector('.revoke-btn');
+          const commentBox = row.querySelector('.comment-box');
+
+          commentBox.value = item.comment || '';
+
+          if (item.revoke) {
+            button.classList.add('revoke-active');
+            button.innerText = 'Mark Remove';
+            row.classList.add('revoke-row');
+          }
+        });
+      });
+
+      updateCounter();
+      saveDraft();
+
+      document.getElementById('draftStatus').innerText =
+        'Draft Restored';
+    }
+
     function toggleRevoke(button) {
       const row = button.closest('tr');
 
-      if(button.classList.contains('revoke-active')) {
+      if (button.classList.contains('revoke-active')) {
         button.classList.remove('revoke-active');
-        button.innerText = 'Keep Access';
+        button.innerText = 'No Action';
         row.classList.remove('revoke-row');
       } else {
         button.classList.add('revoke-active');
-        button.innerText = 'Remove Access';
+        button.innerText = 'Mark Remove';
         row.classList.add('revoke-row');
       }
 
       updateCounter();
     }
 
+    document.querySelectorAll('.comment-box').forEach(box => {
+      box.addEventListener('input', () => {
+        saveDraft();
+        updateCounter();
+      });
+    });
+
+    window.addEventListener('beforeunload', function (e) {
+      saveDraft();
+    });
+
     function updateCounter() {
-      const rows = document.querySelectorAll('#accessTable tbody tr');
+      const rows = document.querySelectorAll('tbody tr');
       let count = 0;
 
       rows.forEach(row => {
-        const revokeButton = row.querySelector('.revoke-btn');
-        const isRevoked = revokeButton.classList.contains('revoke-active');
+        const revoke = row.querySelector('.revoke-btn')
+          .classList.contains('revoke-active');
 
-        if (isRevoked || comment.value.trim() !== '') {
+        const comment = row.querySelector('.comment-box').value.trim();
+
+        if (revoke || comment !== '') {
           count++;
         }
       });
@@ -306,60 +714,154 @@
         'Pending Review: ' + count + ' รายการ';
     }
 
-    function submitReview() {
-      const rows = document.querySelectorAll('#accessTable tbody tr');
-      const results = [];
+    function completeRows(targetRows) {
+      targetRows.forEach(row => {
+        const button = row.querySelector('.revoke-btn');
+        const commentBox = row.querySelector('.comment-box');
+        const revoke = button.classList.contains('revoke-active');
 
-      rows.forEach(row => {
-        const empid = row.cells[0].innerText;
-        const user = row.cells[1].innerText;
-        const department = row.cells[2].innerText;
-        const system = row.cells[3].innerText;
-        const revoke = row.querySelector('.revoke-btn').classList.contains('revoke-active');
-        const comment = row.querySelector('.comment-box').value;
+        row.classList.remove('revoke-row');
+        row.classList.add('submitted-row');
 
-        if (revoke || comment.trim() !== '') {
-          results.push({
-            EmpID: empid,
-            UserEmail: user,
-            Department: department,
-            SystemName: system,
-            Revoke: revoke,
-            Comment: comment,
-            ActionDate: new Date().toISOString()
-          });
+        button.disabled = true;
+        commentBox.disabled = true;
+
+        if (revoke) {
+          button.innerText = 'Marked Remove';
+          button.style.background = '#c50f1f';
+          button.style.color = 'white';
+        } else {
+          button.innerText = 'Reviewed';
+          button.style.background = '#107c10';
+          button.style.color = 'white';
         }
       });
 
-      if (results.length === 0) {
-        alert('ไม่มีรายการที่ต้อง Submit');
+      updateSystemTabStatus();
+
+    loadDraft();
+    }
+
+    function submitReview() {
+      console.log('Submit Current Tab:', currentTab);
+
+      if (currentTab === 'ALL') {
+        document.getElementById('allSystemsModal').style.display = 'flex';
         return;
       }
 
-      console.log('Submit Payload:', results);
+      const visibleTab = document.getElementById(currentTab);
 
-      alert('บันทึกข้อมูลเรียบร้อย');
-    }
+      if (!visibleTab) {
+        return;
+      }
 
-    function showTab(systemName) {
-      const tabs = document.querySelectorAll('.system-tab');
+      const rows = visibleTab.querySelectorAll('tbody tr');
+      let hasAction = false;
 
-      tabs.forEach(tab => {
-        tab.style.display = 'none';
+      rows.forEach(row => {
+        const revoke = row.querySelector('.revoke-btn')
+          .classList.contains('revoke-active');
+
+        const comment = row.querySelector('.comment-box').value.trim();
+
+        if (revoke || comment !== '') {
+          hasAction = true;
+        }
       });
 
-      if(systemName === 'ALL') {
-        tabs.forEach(tab => {
-          tab.style.display = 'block';
-        });
-      } else {
-        document.getElementById(systemName).style.display = 'block';
+      if (!hasAction) {
+        document.getElementById('confirmModal').style.display = 'flex';
+        return;
       }
+
+      completeRows(rows);
+
+      localStorage.removeItem('uarDraftData');
+      document.getElementById('draftStatus').innerText = 'Draft cleared';
+
+      window.alert('Review submitted successfully');
+    }
+
+    function confirmSubmitAll() {
+      document.getElementById('confirmModal').style.display = 'none';
+
+      if (currentTab === 'ALL') {
+        window.alert('กรุณาเลือก review ทีละระบบ ไม่สามารถ Submit จาก ALL SYSTEMS ได้');
+        return;
+      }
+
+      const visibleTab = document.getElementById(currentTab);
+
+      if (!visibleTab) {
+        return;
+      }
+
+      const rows = visibleTab.querySelectorAll('tbody tr');
+
+      completeRows(rows);
+
+      localStorage.removeItem('uarDraftData');
+      document.getElementById('draftStatus').innerText = 'Draft cleared';
+
+      window.alert('Review submitted successfully');
+    }
+
+    function closeAllSystemsModal() {
+      document.getElementById('allSystemsModal').style.display = 'none';
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').style.display = 'none';
+    }
+
+    function sortCurrentTab(sortBy) {
+      const visibleTab = Array.from(document.querySelectorAll('.system-tab'))
+        .find(tab => tab.style.display !== 'none');
+
+      if (!visibleTab) {
+        return;
+      }
+
+      const systemName = visibleTab.id;
+      sortTable(systemName, sortBy);
+    }
+
+    function sortTable(systemName, sortBy) {
+      const visibleTab = document.getElementById(systemName);
+
+      if (!visibleTab) {
+        return;
+      }
+
+      const tbody = visibleTab.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+
+      const columnIndexMap = {
+        empid: 0,
+        name: 1,
+        section: 2
+      };
+
+      const columnIndex = columnIndexMap[sortBy];
+
+      rows.sort((a, b) => {
+        const textA = a.cells[columnIndex].innerText.toLowerCase();
+        const textB = b.cells[columnIndex].innerText.toLowerCase();
+
+        return textA.localeCompare(textB);
+      });
+
+      rows.forEach(row => tbody.appendChild(row));
     }
 
     function filterTable() {
-      const input = document.getElementById('searchInput').value.toLowerCase();
-      const rows = document.querySelectorAll('#accessTable tbody tr');
+      const input = document
+        .getElementById('searchInput')
+        .value
+        .toLowerCase();
+
+      const rows = document.querySelectorAll('tbody tr');
 
       rows.forEach(row => {
         const text = row.innerText.toLowerCase();
@@ -369,6 +871,35 @@
         } else {
           row.style.display = 'none';
         }
+      });
+    }
+
+    function updateSystemTabStatus() {
+      const systems = document.querySelectorAll('.system-tab');
+
+      systems.forEach(system => {
+        const rows = system.querySelectorAll('tbody tr');
+        let completed = true;
+
+        rows.forEach(row => {
+          if (!row.classList.contains('submitted-row')) {
+            completed = false;
+          }
+        });
+
+        const systemId = system.id;
+
+        document.querySelectorAll('.system-tab-btn').forEach(btn => {
+          const buttonSystem = btn.getAttribute('data-system');
+
+          if (buttonSystem === systemId && completed) {
+            btn.classList.add('system-complete');
+
+            if (!btn.innerText.startsWith('✓')) {
+              btn.innerText = '✓ ' + btn.innerText;
+            }
+          }
+        });
       });
     }
 
