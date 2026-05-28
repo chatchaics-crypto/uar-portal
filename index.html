@@ -3,907 +3,1037 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UAR Portal</title>
-
+  <title>UAR Portal — Access Review</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --navy-900: #0a1628;
+      --navy-800: #0f2044;
+      --navy-700: #1a3260;
+      --navy-600: #1e4080;
+      --navy-500: #1d4ed8;
+      --navy-400: #3b82f6;
+      --navy-100: #dbeafe;
+      --navy-50:  #eff6ff;
+      --slate-900: #0f172a;
+      --slate-700: #334155;
+      --slate-500: #64748b;
+      --slate-400: #94a3b8;
+      --slate-300: #cbd5e1;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50:  #f8fafc;
+      --green-700: #15803d;
+      --green-600: #16a34a;
+      --green-100: #dcfce7;
+      --red-700:   #b91c1c;
+      --red-100:   #fee2e2;
+      --amber-600: #d97706;
+      --amber-100: #fef3c7;
+      --white: #ffffff;
+      --sidebar-w: 220px;
+      --header-h: 60px;
+      --radius: 8px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f3f2f1;
-      margin: 0;
-      color: #323130;
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--slate-100);
+      color: var(--slate-900);
+      display: flex; flex-direction: column; min-height: 100vh;
     }
 
-    .header {
-      background: #0f6cbd;
-      color: white;
-      padding: 20px;
+    /* ── TOPBAR ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: var(--navy-900);
+      display: flex; align-items: center;
+      padding: 0 20px; gap: 14px;
+      z-index: 100; border-bottom: 1px solid var(--navy-700);
+    }
+    .topbar-logo {
+      display: flex; align-items: center; gap: 9px;
+      color: var(--white); font-size: 14px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+    }
+    .topbar-divider { width: 1px; height: 28px; background: var(--navy-700); flex-shrink: 0; }
+    .topbar-meta { display: flex; flex-direction: column; gap: 1px; }
+    .topbar-meta-label { font-size: 9px; color: var(--navy-400); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+    .topbar-meta-value { font-size: 12px; color: #94a3b8; font-family: 'IBM Plex Mono', monospace; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+    .topbar-draft { font-size: 11.5px; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
+    .topbar-draft .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber-600); flex-shrink: 0; transition: background 0.3s; }
+    .topbar-draft.saved .dot { background: var(--green-600); }
+    .topbar-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--navy-600); color: var(--navy-100); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 1.5px solid var(--navy-500); }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; margin-top: var(--header-h); min-height: calc(100vh - var(--header-h)); }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: var(--navy-800);
+      position: fixed; top: var(--header-h); left: 0; bottom: 0;
+      display: flex; flex-direction: column;
+      border-right: 1px solid var(--navy-700); z-index: 90; overflow-y: auto;
+    }
+    .sidebar-section-label { font-size: 9.5px; font-weight: 700; color: var(--navy-400); text-transform: uppercase; letter-spacing: 0.12em; padding: 20px 16px 8px; }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; cursor: pointer; border: none;
+      background: transparent; width: 100%; text-align: left;
+      color: #94a3b8; font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-item:hover { background: var(--navy-700); color: var(--white); }
+    .sidebar-item.active { background: rgba(29,78,216,0.18); color: var(--white); border-left-color: var(--navy-400); }
+    .sidebar-item-icon { width: 30px; height: 30px; border-radius: 7px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sidebar-item.active .sidebar-item-icon { background: rgba(29,78,216,0.35); }
+    .sidebar-item-label { flex: 1; }
+    .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--navy-700); }
+    .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-bottom: 6px; }
+    .progress-bar-bg { height: 4px; background: var(--navy-700); border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--navy-500), var(--navy-400)); border-radius: 4px; transition: width 0.4s ease; width: 0%; }
+
+    /* ── MAIN ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+    /* ── PAGE SECTION (shared) ── */
+    .page-section { display: none; flex: 1; flex-direction: column; }
+    .page-section.active { display: flex; }
+
+    /* ── PAGE TITLE BAR ── */
+    .page-titlebar { background: var(--white); border-bottom: 1px solid var(--slate-200); padding: 16px 28px 0; }
+    .page-breadcrumb { font-size: 11.5px; color: var(--slate-400); margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+    .page-breadcrumb .sep { color: var(--slate-300); }
+    .page-title-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .page-title { font-size: 19px; font-weight: 700; color: var(--navy-900); letter-spacing: -0.02em; }
+    .page-sub { font-size: 12.5px; color: var(--slate-500); margin-top: 2px; }
+
+    /* ── SYSTEM TABS (page 1) ── */
+    .system-tabs-bar { display: flex; align-items: center; gap: 2px; margin-top: 16px; }
+    .sys-tab-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 9px 16px; border: none; background: transparent;
+      cursor: pointer; font-size: 13px; font-weight: 500;
+      font-family: 'IBM Plex Sans', sans-serif; color: var(--slate-500);
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      border-radius: 6px 6px 0 0; transition: color 0.15s, background 0.15s; white-space: nowrap;
+    }
+    .sys-tab-btn:hover { background: var(--slate-100); color: var(--slate-700); }
+    .sys-tab-btn.active { color: var(--navy-600); font-weight: 700; border-bottom-color: var(--navy-500); }
+    .sys-tab-btn.complete { color: var(--green-600); }
+    .sys-tab-btn.complete.active { border-bottom-color: var(--green-600); }
+    .tab-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 10px; background: var(--slate-200); color: var(--slate-600); font-size: 10px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+    .sys-tab-btn.active .tab-badge { background: var(--navy-100); color: var(--navy-700); }
+    .sys-tab-btn.complete .tab-badge { background: var(--green-100); color: var(--green-700); }
+
+    /* ── CONTENT ── */
+    .content { padding: 20px 28px 28px; flex: 1; }
+
+    /* ── TOOLBAR ── */
+    .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 320px; }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--slate-400); pointer-events: none; }
+    .search-box { width: 100%; padding: 8px 12px 8px 32px; border: 1px solid var(--slate-300); border-radius: var(--radius); background: var(--white); font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; color: var(--slate-900); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+    .search-box:focus { border-color: var(--navy-500); box-shadow: 0 0 0 3px rgba(29,78,216,0.1); }
+    .sort-select { padding: 8px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius); background: var(--white); font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; color: var(--slate-700); outline: none; cursor: pointer; }
+    .counter-chip { display: flex; align-items: center; gap: 7px; background: var(--amber-100); color: var(--amber-600); padding: 6px 13px; border-radius: var(--radius); font-size: 12.5px; font-weight: 600; border: 1px solid #fde68a; white-space: nowrap; }
+    .counter-chip .chip-num { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 700; }
+    .counter-chip.zero { background: var(--green-100); color: var(--green-700); border-color: #bbf7d0; }
+    .submit-btn { margin-left: auto; background: var(--navy-900); color: white; border: none; padding: 8px 18px; border-radius: var(--radius); font-size: 13px; font-weight: 600; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: background 0.15s; white-space: nowrap; }
+    .submit-btn:hover { background: var(--navy-700); }
+
+    /* ── CARD ── */
+    .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--slate-200); overflow: hidden; margin-bottom: 16px; }
+    .card-header { padding: 14px 20px; border-bottom: 1px solid var(--slate-200); display: flex; align-items: center; gap: 10px; }
+    .card-header-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--navy-50); border: 1px solid var(--navy-100); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--navy-600); font-family: 'IBM Plex Mono', monospace; }
+    .card-title { font-size: 14px; font-weight: 700; color: var(--slate-900); }
+    .card-sub { font-size: 11.5px; color: var(--slate-500); }
+
+    /* ── PAGE 1 TABLE ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: var(--slate-50); color: var(--slate-500); padding: 9px 16px; text-align: left; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--slate-200); white-space: nowrap; }
+    td { padding: 11px 16px; border-bottom: 1px solid var(--slate-100); font-size: 13.5px; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--slate-50); }
+    .empid-cell { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--slate-400); font-weight: 500; }
+    .name-cell { font-weight: 600; color: var(--slate-900); }
+    .section-cell { color: var(--slate-600); font-size: 13px; }
+    .role-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--navy-50); color: var(--navy-700); padding: 3px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 600; border: 1px solid var(--navy-100); white-space: nowrap; }
+    .role-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--navy-500); display: inline-block; flex-shrink: 0; }
+    .comment-box { width: 100%; padding: 6px 10px; border: 1px solid var(--slate-300); border-radius: 6px; font-size: 12.5px; font-family: 'IBM Plex Sans', sans-serif; color: var(--slate-700); background: var(--white); outline: none; transition: border-color 0.15s; min-width: 150px; }
+    .comment-box:focus { border-color: var(--navy-500); box-shadow: 0 0 0 2px rgba(29,78,216,0.08); }
+    .revoke-btn { padding: 5px 13px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; font-family: 'IBM Plex Sans', sans-serif; border: 1px solid var(--slate-300); background: var(--white); color: var(--slate-600); transition: all 0.15s; white-space: nowrap; }
+    .revoke-btn:hover:not(:disabled) { border-color: var(--navy-400); color: var(--navy-700); }
+    .revoke-btn.revoke-active { background: var(--red-100); color: var(--red-700); border-color: #fca5a5; }
+    .revoke-btn:disabled { cursor: default; opacity: 0.85; }
+    tr.revoke-row td { background: #fff8f8; }
+    tr.submitted-row td { background: #f0fdf4; }
+    .pagination { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--slate-200); background: var(--slate-50); font-size: 12px; color: var(--slate-500); }
+    .page-buttons { display: flex; gap: 6px; }
+    .page-btn { padding: 4px 11px; border: 1px solid var(--slate-300); border-radius: 5px; background: var(--white); font-size: 12px; font-family: 'IBM Plex Sans', sans-serif; color: var(--slate-700); cursor: pointer; font-weight: 500; }
+    .page-btn:hover:not(:disabled) { border-color: var(--navy-400); color: var(--navy-600); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .system-tab { display: none; }
+
+    /* ── PAGE 2 — MATRIX VIEW ── */
+    .dept-group { margin-bottom: 24px; }
+
+    .dept-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 20px;
+      background: var(--navy-900);
+      border-radius: var(--radius) var(--radius) 0 0;
+      cursor: pointer; user-select: none;
+      border: 1px solid var(--navy-700);
+    }
+    .dept-header:hover { background: var(--navy-800); }
+    .dept-icon { width: 28px; height: 28px; border-radius: 6px; background: rgba(29,78,216,0.35); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .dept-name { font-size: 13px; font-weight: 700; color: var(--white); flex: 1; letter-spacing: 0.03em; }
+    .dept-count { font-size: 11px; color: var(--navy-400); font-family: 'IBM Plex Mono', monospace; }
+    .dept-chevron { color: var(--navy-400); transition: transform 0.2s; }
+    .dept-group.collapsed .dept-chevron { transform: rotate(-90deg); }
+    .dept-group.collapsed .dept-table-wrap { display: none; }
+
+    .dept-table-wrap { overflow-x: auto; border: 1px solid var(--slate-200); border-top: none; border-radius: 0 0 var(--radius) var(--radius); background: var(--white); box-shadow: var(--shadow-sm); }
+
+    .matrix-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+
+    .matrix-table th {
+      background: var(--slate-50);
+      color: var(--slate-500);
+      padding: 9px 14px;
+      font-size: 10.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      border-bottom: 2px solid var(--slate-200);
+      white-space: nowrap; text-align: left;
     }
 
-    .container {
-      padding: 20px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    }
-
-    .title {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .info {
-      color: #605e5c;
-    }
-
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .toolbar-left {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .search-box,
-    .sort-select {
-      padding: 10px;
-      border: 1px solid #c8c6c4;
-      border-radius: 6px;
-      background: white;
-    }
-
-    .search-box {
-      width: 320px;
-    }
-
-    .status-bar {
-      font-weight: 600;
-    }
-
-    .system-tabs {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-
-    .system-tab-btn,
-    .submit-btn {
-      background: #0f6cbd;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .system-tab-btn:hover,
-    .submit-btn:hover {
-      background: #115ea3;
-    }
-
-    .system-complete {
-      background: #107c10 !important;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th {
-      background: #0f6cbd;
-      color: white;
-      padding: 12px;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    td {
-      padding: 10px;
-      border-bottom: 1px solid #edebe9;
-      vertical-align: middle;
-    }
-
-    tr:hover {
-      background: #faf9f8;
-    }
-
-    .role-badge {
-      display: inline-block;
-      background: #e5f1fb;
-      color: #0f548c;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .comment-box {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #c8c6c4;
-      border-radius: 4px;
-    }
-
-    .revoke-btn {
-      background: #e7f5ea;
-      color: #107c10;
-      border: 1px solid #107c10;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .revoke-active {
-      background: #fde7e9 !important;
-      color: #c50f1f !important;
-      border-color: #c50f1f !important;
-    }
-
-    .revoke-row {
-      background: #fff4f4 !important;
-    }
-
-    .submitted-row {
-      background: #edf7ed !important;
-    }
-
-    .pagination {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 16px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .page-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .page-btn {
-      background: #0f6cbd;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .page-btn:disabled {
-      background: #c8c6c4;
-      cursor: not-allowed;
-    }
-
-    #confirmModal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 999;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-content {
-      background: white;
-      width: 360px;
-      padding: 24px;
-      border-radius: 10px;
+    .matrix-table th.sys-col-header {
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      background: var(--navy-50);
+      color: var(--navy-700);
+      border-left: 1px solid var(--navy-100);
+      min-width: 190px;
     }
 
-    .modal-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
+    .matrix-table td {
+      padding: 0;
+      border-bottom: 1px solid var(--slate-100);
+      vertical-align: top;
+    }
+    .matrix-table tr:last-child td { border-bottom: none; }
+
+    /* Employee info cells */
+    .emp-cell { padding: 14px 14px; vertical-align: middle; }
+    .emp-id { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--slate-400); font-weight: 500; margin-bottom: 2px; }
+    .emp-name { font-size: 13.5px; font-weight: 700; color: var(--slate-900); }
+    .emp-position { font-size: 11.5px; color: var(--slate-500); margin-top: 1px; }
+
+    /* System cell */
+    .sys-cell {
+      border-left: 1px solid var(--slate-200);
+      vertical-align: top;
+      min-width: 190px;
     }
 
-    .cancel-btn {
-      background: #f3f2f1;
-      color: #323130;
-      border: 1px solid #c8c6c4;
-      padding: 10px 16px;
-      border-radius: 6px;
-      cursor: pointer;
+    .sys-cell-inner {
+      padding: 10px 12px;
+      display: flex; flex-direction: column; gap: 6px;
+      min-height: 90px;
     }
 
-    .draft-status {
-      font-size: 13px;
-      color: #107c10;
-      font-weight: 600;
-      margin-left: 10px;
+    .sys-cell-none {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 90px; color: var(--slate-300);
+      font-size: 18px; letter-spacing: 0.1em;
     }
 
-    .footer {
-      margin-top: 30px;
-      text-align: center;
-      color: #8a8886;
-      font-size: 12px;
+    .sys-role-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--navy-50); color: var(--navy-700);
+      padding: 3px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 600;
+      border: 1px solid var(--navy-100); white-space: nowrap;
+      width: fit-content;
     }
+    .sys-role-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--navy-500); display: inline-block; flex-shrink: 0; }
+
+    .matrix-action-row { display: flex; gap: 5px; }
+
+    .mat-approve-btn, .mat-revoke-btn {
+      flex: 1; padding: 4px 0;
+      border-radius: 5px; cursor: pointer;
+      font-size: 11px; font-weight: 700;
+      font-family: 'IBM Plex Sans', sans-serif;
+      border: 1px solid; transition: all 0.15s;
+      white-space: nowrap; text-align: center;
+    }
+    .mat-approve-btn { background: var(--white); color: var(--green-600); border-color: #86efac; }
+    .mat-approve-btn:hover:not(:disabled) { background: var(--green-100); }
+    .mat-approve-btn.selected { background: var(--green-100); color: var(--green-700); border-color: var(--green-600); }
+
+    .mat-revoke-btn { background: var(--white); color: var(--red-700); border-color: #fca5a5; }
+    .mat-revoke-btn:hover:not(:disabled) { background: var(--red-100); }
+    .mat-revoke-btn.selected { background: var(--red-100); color: var(--red-700); border-color: var(--red-700); }
+
+    .mat-comment {
+      width: 100%; padding: 4px 8px;
+      border: 1px solid var(--slate-300); border-radius: 5px;
+      font-size: 11.5px; font-family: 'IBM Plex Sans', sans-serif;
+      color: var(--slate-700); outline: none; resize: none;
+      transition: border-color 0.15s;
+    }
+    .mat-comment:focus { border-color: var(--navy-500); box-shadow: 0 0 0 2px rgba(29,78,216,0.08); }
+    .mat-comment:disabled { background: var(--slate-50); color: var(--slate-400); }
+
+    .mat-submitted-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600; padding: 3px 8px;
+      border-radius: 4px; width: fit-content;
+    }
+    .mat-submitted-badge.approved { background: var(--green-100); color: var(--green-700); }
+    .mat-submitted-badge.revoked  { background: var(--red-100);   color: var(--red-700); }
+
+    /* row highlight */
+    .matrix-table tr.mat-row-revoked td  { background: #fff8f8; }
+    .matrix-table tr.mat-row-approved td { background: #f0fdf4; }
+
+    /* matrix toolbar */
+    .matrix-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .dept-filter-select { padding: 8px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius); background: var(--white); font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; color: var(--slate-700); outline: none; cursor: pointer; }
+    .matrix-submit-btn { margin-left: auto; background: var(--navy-900); color: white; border: none; padding: 8px 18px; border-radius: var(--radius); font-size: 13px; font-weight: 600; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: background 0.15s; white-space: nowrap; }
+    .matrix-submit-btn:hover { background: var(--navy-700); }
+
+    .mat-progress-chip {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--navy-50); color: var(--navy-700);
+      padding: 6px 13px; border-radius: var(--radius);
+      font-size: 12.5px; font-weight: 600;
+      border: 1px solid var(--navy-100); white-space: nowrap;
+    }
+    .mat-progress-chip span { font-family: 'IBM Plex Mono', monospace; font-weight: 700; }
+
+    /* ── MODAL ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,22,40,0.55); z-index: 999; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+    .modal-box { background: var(--white); width: 370px; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
+    .modal-top { background: var(--navy-900); padding: 18px 22px; display: flex; align-items: center; gap: 10px; }
+    .modal-top-icon { width: 32px; height: 32px; border-radius: 7px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; }
+    .modal-top h3 { color: white; font-size: 14px; font-weight: 700; }
+    .modal-body { padding: 18px 22px; }
+    .modal-body p { font-size: 13.5px; color: var(--slate-600); line-height: 1.65; }
+    .modal-footer { display: flex; gap: 8px; padding: 0 22px 18px; justify-content: flex-end; }
+    .btn-primary { background: var(--navy-800); color: white; border: none; padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 600; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; }
+    .btn-primary:hover { background: var(--navy-700); }
+    .btn-secondary { background: var(--white); color: var(--slate-700); border: 1px solid var(--slate-300); padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 600; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; }
+    .btn-secondary:hover { border-color: var(--slate-400); }
+
+    .footer { text-align: center; font-size: 11px; color: var(--slate-400); padding: 16px 28px; border-top: 1px solid var(--slate-200); font-family: 'IBM Plex Mono', monospace; }
   </style>
 </head>
-
 <body>
 
-  <div class="header">
-    <h1>Access Review Management</h1>
-    <div>Manager: manager@symphony.net.th</div>
-    <div>Division: IT</div>
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect width="24" height="24" rx="5" fill="#1d4ed8" opacity="0.25"/>
+      <path d="M5 8h14M5 12h14M5 16h8" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="18" cy="16" r="2.2" stroke="#60a5fa" stroke-width="1.5"/>
+      <path d="M19.5 17.5l1.5 1.5" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    UAR Portal
   </div>
-
-  <div class="container">
-
-    <div class="card">
-      <div class="title">User Access Review</div>
-      <div class="info">
-        Review user access permissions and mark unnecessary access for removal.
-      </div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-meta">
+    <div class="topbar-meta-label">Manager</div>
+    <div class="topbar-meta-value">manager@symphony.net.th</div>
+  </div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-meta">
+    <div class="topbar-meta-label">Division</div>
+    <div class="topbar-meta-value">IT</div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-draft" id="draftStatusBar">
+      <span class="dot"></span>
+      <span id="draftStatusText">Draft not saved</span>
     </div>
+    <div class="topbar-avatar">MG</div>
+  </div>
+</header>
 
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <input
-          type="text"
-          id="searchInput"
-          class="search-box"
-          placeholder="Search EmpID / Name / Role"
-          onkeyup="filterTable()"
-        />
+<!-- LAYOUT -->
+<div class="layout">
 
-        <select
-          id="globalSortSelect"
-          class="sort-select"
-          onchange="sortCurrentTab(this.value)"
-        >
-          <option value="empid">Sort by EmpID</option>
-          <option value="name">Sort by Name</option>
-          <option value="section">Sort by Section</option>
-        </select>
-      </div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section-label">Main Menu</div>
 
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div class="status-bar" id="reviewCounter">
-          Pending Review: 0 รายการ
-        </div>
-
-        <div class="draft-status" id="draftStatus">
-          Draft not saved
-        </div>
-      </div>
-    </div>
-
-    <div class="system-tabs">
-      <button class="system-tab-btn" data-system="ERP" onclick="showTab('ERP')">
-        ERP
-      </button>
-
-      <button class="system-tab-btn" data-system="VPN" onclick="showTab('VPN')">
-        VPN
-      </button>
-
-      <button class="system-tab-btn" data-system="SAP" onclick="showTab('SAP')">
-        SAP
-      </button>
-
-      <button class="system-tab-btn" data-system="M365" onclick="showTab('M365')">
-        Microsoft 365
-      </button>
-
-      <button id="allSystemsBtn" class="system-tab-btn" data-system="ALL" onclick="showTab('ALL')">
-        ALL SYSTEMS
-      </button>
-    </div>
-
-    <div id="ERP" class="system-tab">
-      <div class="card">
-        <div class="title">ERP Role Review</div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>EmpID</th>
-              <th>Name / Surname</th>
-              <th>Section</th>
-              <th>Role / Permission</th>
-              <th>Review Action</th>
-              <th>Comment</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              <td>EMP001</td>
-              <td>John Smith</td>
-              <td>Infrastructure Team</td>
-              <td><span class="role-badge">ERP Admin</span></td>
-              <td>
-                <button class="revoke-btn" onclick="toggleRevoke(this)">
-                  No Action
-                </button>
-              </td>
-              <td>
-                <input
-                  type="text"
-                  class="comment-box"
-                  placeholder="Comment..."
-                  onkeyup="updateCounter()"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="pagination">
-          <div>Showing 1-100 of 1 records</div>
-
-          <div class="page-buttons">
-            <button class="page-btn" disabled>Previous</button>
-            <button class="page-btn" disabled>Next</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="VPN" class="system-tab" style="display:none;">
-      <div class="card">
-        <div class="title">VPN Role Review</div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>EmpID</th>
-              <th>Name / Surname</th>
-              <th>Section</th>
-              <th>Role / Permission</th>
-              <th>Review Action</th>
-              <th>Comment</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              <td>EMP002</td>
-              <td>Jane Doe</td>
-              <td>Cyber Security</td>
-              <td><span class="role-badge">VPN Privileged Access</span></td>
-              <td>
-                <button class="revoke-btn" onclick="toggleRevoke(this)">
-                  No Action
-                </button>
-              </td>
-              <td>
-                <input
-                  type="text"
-                  class="comment-box"
-                  placeholder="Comment..."
-                  onkeyup="updateCounter()"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="pagination">
-          <div>Showing 1-100 of 1 records</div>
-
-          <div class="page-buttons">
-            <button class="page-btn" disabled>Previous</button>
-            <button class="page-btn" disabled>Next</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="SAP" class="system-tab" style="display:none;">
-      <div class="card">
-        <div class="title">SAP Role Review</div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>EmpID</th>
-              <th>Name / Surname</th>
-              <th>Section</th>
-              <th>Role / Permission</th>
-              <th>Review Action</th>
-              <th>Comment</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              <td>EMP003</td>
-              <td>Michael Tan</td>
-              <td>Finance</td>
-              <td><span class="role-badge">SAP Finance User</span></td>
-              <td>
-                <button class="revoke-btn" onclick="toggleRevoke(this)">
-                  No Action
-                </button>
-              </td>
-              <td>
-                <input
-                  type="text"
-                  class="comment-box"
-                  placeholder="Comment..."
-                  onkeyup="updateCounter()"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="pagination">
-          <div>Showing 1-100 of 1 records</div>
-
-          <div class="page-buttons">
-            <button class="page-btn" disabled>Previous</button>
-            <button class="page-btn" disabled>Next</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="M365" class="system-tab" style="display:none;">
-      <div class="card">
-        <div class="title">Microsoft 365 Review</div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>EmpID</th>
-              <th>Name / Surname</th>
-              <th>Section</th>
-              <th>Role / Permission</th>
-              <th>Review Action</th>
-              <th>Comment</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              <td>EMP004</td>
-              <td>David Lee</td>
-              <td>Collaboration Team</td>
-              <td><span class="role-badge">Teams Administrator</span></td>
-              <td>
-                <button class="revoke-btn" onclick="toggleRevoke(this)">
-                  No Action
-                </button>
-              </td>
-              <td>
-                <input
-                  type="text"
-                  class="comment-box"
-                  placeholder="Comment..."
-                  onkeyup="updateCounter()"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="pagination">
-          <div>Showing 1-100 of 1 records</div>
-
-          <div class="page-buttons">
-            <button class="page-btn" disabled>Previous</button>
-            <button class="page-btn" disabled>Next</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <button class="submit-btn" onclick="submitReview()">
-      Submit Current Tab Review
+    <button class="sidebar-item active" id="nav-access" onclick="navigateTo('access')">
+      <span class="sidebar-item-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+        </svg>
+      </span>
+      <span class="sidebar-item-label">Access Review</span>
     </button>
 
-    <div id="allSystemsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
-      <div class="modal-content">
-        <h3>Warning</h3>
+    <button class="sidebar-item" id="nav-matrix" onclick="navigateTo('matrix')">
+      <span class="sidebar-item-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="nav-matrix-icon">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </span>
+      <span class="sidebar-item-label">Dept. Matrix View</span>
+    </button>
 
-        <p>
-          กรุณาเลือก review ทีละระบบ<br />
-          ไม่สามารถ Submit จาก ALL SYSTEMS ได้
-        </p>
+    <button class="sidebar-item" style="opacity:0.45;cursor:not-allowed;">
+      <span class="sidebar-item-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+      </span>
+      <span class="sidebar-item-label">User Management</span>
+    </button>
 
-        <div class="modal-buttons">
-          <button class="submit-btn" onclick="closeAllSystemsModal()">
-            OK
+    <button class="sidebar-item" style="opacity:0.45;cursor:not-allowed;">
+      <span class="sidebar-item-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </span>
+      <span class="sidebar-item-label">Audit Log</span>
+    </button>
+
+    <div class="sidebar-section-label" style="margin-top:8px;">Reports</div>
+    <button class="sidebar-item" style="opacity:0.45;cursor:not-allowed;">
+      <span class="sidebar-item-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+      </span>
+      <span class="sidebar-item-label">Summary Report</span>
+    </button>
+    <button class="sidebar-item" style="opacity:0.45;cursor:not-allowed;">
+      <span class="sidebar-item-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </span>
+      <span class="sidebar-item-label">Review History</span>
+    </button>
+
+    <div class="sidebar-footer">
+      <div class="progress-label">
+        <span>Overall Progress</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ══════════ PAGE 1: ACCESS REVIEW ══════════ -->
+    <div class="page-section active" id="page-access">
+      <div class="page-titlebar">
+        <div class="page-breadcrumb">Main Menu <span class="sep">›</span> Access Review</div>
+        <div class="page-title-row">
+          <div>
+            <div class="page-title">User Access Review</div>
+            <div class="page-sub">Review permissions and mark unnecessary access for removal</div>
+          </div>
+        </div>
+        <div class="system-tabs-bar">
+          <button class="sys-tab-btn active" data-system="ERP" onclick="showTab('ERP')">ERP <span class="tab-badge" id="badge-ERP">1</span></button>
+          <button class="sys-tab-btn" data-system="VPN" onclick="showTab('VPN')">VPN <span class="tab-badge" id="badge-VPN">1</span></button>
+          <button class="sys-tab-btn" data-system="SAP" onclick="showTab('SAP')">SAP <span class="tab-badge" id="badge-SAP">1</span></button>
+          <button class="sys-tab-btn" data-system="M365" onclick="showTab('M365')">Microsoft 365 <span class="tab-badge" id="badge-M365">1</span></button>
+          <button class="sys-tab-btn" data-system="ALL" onclick="showTab('ALL')">All Systems</button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" class="search-box" placeholder="Search EmpID / Name / Role..." onkeyup="filterTable()" />
+          </div>
+          <select id="globalSortSelect" class="sort-select" onchange="sortCurrentTab(this.value)">
+            <option value="empid">Sort: EmpID</option>
+            <option value="name">Sort: Name</option>
+            <option value="section">Sort: Section</option>
+          </select>
+          <div class="counter-chip" id="reviewCounter">
+            <span class="chip-num" id="counterNum">0</span><span>Marked for Action</span>
+          </div>
+          <button class="submit-btn" onclick="submitReview()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Submit Review
           </button>
         </div>
+
+        <!-- ERP -->
+        <div id="ERP" class="system-tab" style="display:block;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-icon">ERP</div>
+              <div><div class="card-title">ERP Role Review</div><div class="card-sub">Enterprise Resource Planning — access permissions</div></div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Emp ID</th><th>Name / Surname</th><th>Section</th><th>Role / Permission</th><th>Action</th><th>Comment</th></tr></thead>
+              <tbody>
+                <tr><td class="empid-cell">EMP001</td><td class="name-cell">John Smith</td><td class="section-cell">Infrastructure Team</td><td><span class="role-badge">ERP Admin</span></td><td><button class="revoke-btn" onclick="toggleRevoke(this)">No Action</button></td><td><input type="text" class="comment-box" placeholder="Add comment..." onkeyup="onCommentChange()" /></td></tr>
+              </tbody>
+            </table></div>
+            <div class="pagination"><div>Showing 1–1 of 1 records</div><div class="page-buttons"><button class="page-btn" disabled>← Prev</button><button class="page-btn" disabled>Next →</button></div></div>
+          </div>
+        </div>
+
+        <!-- VPN -->
+        <div id="VPN" class="system-tab" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-icon">VPN</div>
+              <div><div class="card-title">VPN Role Review</div><div class="card-sub">Virtual Private Network — access permissions</div></div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Emp ID</th><th>Name / Surname</th><th>Section</th><th>Role / Permission</th><th>Action</th><th>Comment</th></tr></thead>
+              <tbody>
+                <tr><td class="empid-cell">EMP002</td><td class="name-cell">Jane Doe</td><td class="section-cell">Cyber Security</td><td><span class="role-badge">VPN Privileged Access</span></td><td><button class="revoke-btn" onclick="toggleRevoke(this)">No Action</button></td><td><input type="text" class="comment-box" placeholder="Add comment..." onkeyup="onCommentChange()" /></td></tr>
+              </tbody>
+            </table></div>
+            <div class="pagination"><div>Showing 1–1 of 1 records</div><div class="page-buttons"><button class="page-btn" disabled>← Prev</button><button class="page-btn" disabled>Next →</button></div></div>
+          </div>
+        </div>
+
+        <!-- SAP -->
+        <div id="SAP" class="system-tab" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-icon">SAP</div>
+              <div><div class="card-title">SAP Role Review</div><div class="card-sub">SAP ERP — access permissions</div></div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Emp ID</th><th>Name / Surname</th><th>Section</th><th>Role / Permission</th><th>Action</th><th>Comment</th></tr></thead>
+              <tbody>
+                <tr><td class="empid-cell">EMP003</td><td class="name-cell">Michael Tan</td><td class="section-cell">Finance</td><td><span class="role-badge">SAP Finance User</span></td><td><button class="revoke-btn" onclick="toggleRevoke(this)">No Action</button></td><td><input type="text" class="comment-box" placeholder="Add comment..." onkeyup="onCommentChange()" /></td></tr>
+              </tbody>
+            </table></div>
+            <div class="pagination"><div>Showing 1–1 of 1 records</div><div class="page-buttons"><button class="page-btn" disabled>← Prev</button><button class="page-btn" disabled>Next →</button></div></div>
+          </div>
+        </div>
+
+        <!-- M365 -->
+        <div id="M365" class="system-tab" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-icon">M365</div>
+              <div><div class="card-title">Microsoft 365 Review</div><div class="card-sub">Microsoft 365 — access permissions</div></div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Emp ID</th><th>Name / Surname</th><th>Section</th><th>Role / Permission</th><th>Action</th><th>Comment</th></tr></thead>
+              <tbody>
+                <tr><td class="empid-cell">EMP004</td><td class="name-cell">David Lee</td><td class="section-cell">Collaboration Team</td><td><span class="role-badge">Teams Administrator</span></td><td><button class="revoke-btn" onclick="toggleRevoke(this)">No Action</button></td><td><input type="text" class="comment-box" placeholder="Add comment..." onkeyup="onCommentChange()" /></td></tr>
+              </tbody>
+            </table></div>
+            <div class="pagination"><div>Showing 1–1 of 1 records</div><div class="page-buttons"><button class="page-btn" disabled>← Prev</button><button class="page-btn" disabled>Next →</button></div></div>
+          </div>
+        </div>
+
+        <div class="footer">Access Review Management System — UAR Portal v2.1</div>
       </div>
     </div>
 
-    <div id="confirmModal">
-      <div class="modal-content">
-        <h3>Confirm Review</h3>
+    <!-- ══════════ PAGE 2: DEPT MATRIX VIEW ══════════ -->
+    <div class="page-section" id="page-matrix">
+      <div class="page-titlebar">
+        <div class="page-breadcrumb">Main Menu <span class="sep">›</span> Department Matrix View</div>
+        <div class="page-title-row">
+          <div>
+            <div class="page-title">Department Matrix View</div>
+            <div class="page-sub">Review access permissions grouped by department — one row per employee across all systems</div>
+          </div>
+        </div>
+        <div style="height:1px;"></div>
+      </div>
 
-        <p>
-          ไม่มีการเปลี่ยนแปลงรายการ<br />
-          ต้องการ Submit Review ทั้งหมดหรือไม่?
-        </p>
-
-        <div class="modal-buttons">
-          <button class="submit-btn" onclick="confirmSubmitAll()">
-            Confirm
-          </button>
-
-          <button class="cancel-btn" onclick="closeConfirmModal()">
-            Cancel
+      <div class="content">
+        <!-- Matrix Toolbar -->
+        <div class="matrix-toolbar">
+          <div class="search-wrap">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="search-box" placeholder="Search employee..." onkeyup="filterMatrix(this.value)" />
+          </div>
+          <select class="dept-filter-select" onchange="filterDept(this.value)">
+            <option value="ALL">All Departments</option>
+            <option value="Infrastructure">Infrastructure</option>
+            <option value="Cyber Security">Cyber Security</option>
+            <option value="Finance">Finance</option>
+            <option value="Collaboration">Collaboration</option>
+          </select>
+          <div class="mat-progress-chip">
+            Reviewed: <span id="matProgressText">0 / 4</span>
+          </div>
+          <button class="matrix-submit-btn" onclick="submitMatrix()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Submit All
           </button>
         </div>
+
+        <!-- Department: Infrastructure -->
+        <div class="dept-group" data-dept="Infrastructure" id="dept-Infrastructure">
+          <div class="dept-header" onclick="toggleDept('Infrastructure')">
+            <div class="dept-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <span class="dept-name">Infrastructure Team</span>
+            <span class="dept-count">2 employees</span>
+            <svg class="dept-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="dept-table-wrap">
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th style="min-width:160px;">Employee</th>
+                  <th class="sys-col-header">ERP</th>
+                  <th class="sys-col-header">VPN</th>
+                  <th class="sys-col-header">SAP</th>
+                  <th class="sys-col-header">Microsoft 365</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="mat-row" data-emp="John Smith EMP001">
+                  <td class="emp-cell">
+                    <div class="emp-id">EMP001</div>
+                    <div class="emp-name">John Smith</div>
+                    <div class="emp-position">Infrastructure Team</div>
+                  </td>
+                  <td class="sys-cell"><div class="sys-cell-inner">
+                    <span class="sys-role-badge">ERP Admin</span>
+                    <div class="matrix-action-row">
+                      <button class="mat-approve-btn" onclick="matrixAction(this,'approve')">✓ Approve</button>
+                      <button class="mat-revoke-btn" onclick="matrixAction(this,'revoke')">✕ Revoke</button>
+                    </div>
+                    <input type="text" class="mat-comment" placeholder="Comment..." />
+                  </div></td>
+                  <td class="sys-cell"><div class="sys-cell-inner">
+                    <span class="sys-role-badge">VPN Standard</span>
+                    <div class="matrix-action-row">
+                      <button class="mat-approve-btn" onclick="matrixAction(this,'approve')">✓ Approve</button>
+                      <button class="mat-revoke-btn" onclick="matrixAction(this,'revoke')">✕ Revoke</button>
+                    </div>
+                    <input type="text" class="mat-comment" placeholder="Comment..." />
+                  </div></td>
+                  <td class="sys-cell"><div class="sys-cell-none">—</div></td>
+                  <td class="sys-cell"><div class="sys-cell-inner">
+                    <span class="sys-role-badge">M365 User</span>
+                    <div class="matrix-action-row">
+                      <button class="mat-approve-btn" onclick="matrixAction(this,'approve')">✓ Approve</button>
+                      <button class="mat-revoke-btn" onclick="matrixAction(this,'revoke')">✕ Revoke</button>
+                    </div>
+                    <input type="text" class="mat-comment" placeholder="Comment..." />
+                  </div></td>
+                </tr>
+                <tr class="mat-row" data-emp="Alice Wong EMP005">
+                  <td class="emp-cell">
+                    <div class="emp-id">EMP005</div>
+                    <div class="emp-name">Alice Wong</div>
+                    <div class="emp-position">Infrastructure Team</div>
+                  </td>
+                  <td class="sys-cell"><div class="sys-cell-inner">
+                    <span class="sys-role-badge">ERP Viewer</span>
+                    <div class="matrix-action-row">
+                      <button class="mat-approve-btn" onclick="matrixAction(this,'approve')">✓ Approve</button>
+                      <button class="mat-revoke-btn" onclick="matrixAction(this,'revoke')">✕ Revoke</button>
+                    </div>
+                    <input type="text" class="mat-comment" placeholder="Comment..." />
+                  </div></td>
+                  <td class="sys-cell"><div class="sys-cell-none">—</div></td>
+                  <td class="sys-cell"><div class="sys-cell-none">—</div></td>
+                  <td class="sys-cell"><div class="sys-cell-inner">
+                    <span class="sys-role-badge">M365 User</span>
+                    <div class="matrix-action-row">
+                      <button class="mat-approve-btn" onclick="matrixAction(this,'approve')">✓ Approve</button>
+                      <button class="mat-revoke-btn" onclick="matrixAction(this,'revoke')">✕ Revoke</button>
+                    </div>
+                    <input type="text" class="mat-comment" placeholder="Comment..." />
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Department: Cyber Security -->
+        <div class="dept-group" data-dept="Cyber Security" id="dept-CyberSecurity">
+          <div class="dept-header" onclick="toggleDept('CyberSecurity')">
+            <div class="dept-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <span class="dept-name">Cyber Security</span>
+            <span class="dept-count">1 employee</span>
+            <svg class="dept-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="dept-table-wrap">
+            <table class="matrix-table">
+              <thead><tr>
+                <th style="min-width:160px;">Employee</th>
+                <th class="sys-col-header">ERP</th>
+                <th class="sys-col-header">VPN</th>
+                <th class="sys-col-header">SAP</th>
+                <th class="sys-col-header">Microsoft 365</th>
+              </tr></thead>
+              <tbody>
+                <tr class="mat-row" data-emp="Jane Doe EMP002">
+                  <td class="emp-cell">
+                    <div class="emp-id">EMP002</div>
+                    <div class="emp-name">Jane Doe</div>
+                    <div class="emp-position">Cyber Security</div>
+                  </td>
+                  <td class="sys-cell"><div class="sys-cell-none">—</div></td>
+                  <td class="sys-cell"><div class="sys-cell-inner">
+                    <span class="sys-role-badge">VPN Privileged Access</span>
+                    <div class="matrix-action-row">
+                      <button class="mat-approve-btn" onclick="matrixAction(this,'approve')">✓ Approve</button>
+                      <button class="mat-revoke-btn" onclick="matrixAction(this,'revoke')">✕ Revoke</button>
+                    </div>
+                    <input type="text" class="mat-comment" placeholder="Comment..." />
+                  </div></td>
+                  <td class="sys-cell"><div class="sys-cell-none">—</div></td>
+                  <td class="sys-cell"><div class="sys-cell-inner">
+                    <span class="sys-role-badge">M365 User</span>
+                    <div class="matrix-action-row">
+                      <button class="mat-approve-btn" onclick="matrixAction(this,'approve')">✓ Approve</button>
+                      <button class="mat-revoke-btn" onclick="matrixAction(this,'revoke')">✕ Revoke</button>
+                    </div>
+                    <input type="text" class="mat-comment" placeholder="Comment..." />
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Department: Finance -->
+        <div class="dept-group" data-dept="Finance" id="dept-Finance">
+          <div class="dept-header" onclick="toggleDept('Finance')">
+            <div class="dept-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            </div>
+            <span class="dept-name">Finance</span>
+            <span class="dept-count">1 employee</span>
+            <svg class="dept-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="dept-table-wrap">
+            <table class="matrix-table">
+              <thead><tr>
+                <th style="min-width:160px;">Employee</th>
+                <th class="sys-col-header">ERP</th>
+                <th class="sys-col-header">VPN</th>
+                <th class="sys-col-header">SAP</th>
+                <th class="sys-col-header">Microsoft 365</th>
+              </tr></thead>
+              <tbody>
+                <tr class="mat-row" data-emp="Michael Tan EMP003">
+                  <td class="emp-cell">
+                    <div class="emp-id">EMP003</div>
+                    <div class="emp-name">Michael Tan</div>
+                    <div class="emp-position">Finance</div>
+                  </td>
+                  <td class="sys-cell"><div class="sys-cell-inner">
+                    <span class="sys-role-badge">ERP Finance</span>
+                    <div class="matrix-action-row">
+                      <button class="mat-approve-btn" onclick="matrixAction(this,'approve')">✓ Approve</button>
+                      <button class="mat-revoke-btn" onclick="matrixAction(this,'revoke')">✕ Revoke</button>
+                    </div>
+                    <input type="text" class="mat-comment" placeholder="Comment..." />
+                  </div></td>
+                  <td class="sys-cell"><div class="sys-cell-none">—</div></td>
+                  <td class="sys-cell"><div class="sys-cell-inner">
+                    <span class="sys-role-badge">SAP Finance User</span>
+                    <div class="matrix-action-row">
+                      <button class="mat-approve-btn" onclick="matrixAction(this,'approve')">✓ Approve</button>
+                      <button class="mat-revoke-btn" onclick="matrixAction(this,'revoke')">✕ Revoke</button>
+                    </div>
+                    <input type="text" class="mat-comment" placeholder="Comment..." />
+                  </div></td>
+                  <td class="sys-cell"><div class="sys-cell-inner">
+                    <span class="sys-role-badge">M365 User</span>
+                    <div class="matrix-action-row">
+                      <button class="mat-approve-btn" onclick="matrixAction(this,'approve')">✓ Approve</button>
+                      <button class="mat-revoke-btn" onclick="matrixAction(this,'revoke')">✕ Revoke</button>
+                    </div>
+                    <input type="text" class="mat-comment" placeholder="Comment..." />
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Department: Collaboration -->
+        <div class="dept-group" data-dept="Collaboration" id="dept-Collaboration">
+          <div class="dept-header" onclick="toggleDept('Collaboration')">
+            <div class="dept-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <span class="dept-name">Collaboration Team</span>
+            <span class="dept-count">1 employee</span>
+            <svg class="dept-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="dept-table-wrap">
+            <table class="matrix-table">
+              <thead><tr>
+                <th style="min-width:160px;">Employee</th>
+                <th class="sys-col-header">ERP</th>
+                <th class="sys-col-header">VPN</th>
+                <th class="sys-col-header">SAP</th>
+                <th class="sys-col-header">Microsoft 365</th>
+              </tr></thead>
+              <tbody>
+                <tr class="mat-row" data-emp="David Lee EMP004">
+                  <td class="emp-cell">
+                    <div class="emp-id">EMP004</div>
+                    <div class="emp-name">David Lee</div>
+                    <div class="emp-position">Collaboration Team</div>
+                  </td>
+                  <td class="sys-cell"><div class="sys-cell-none">—</div></td>
+                  <td class="sys-cell"><div class="sys-cell-none">—</div></td>
+                  <td class="sys-cell"><div class="sys-cell-none">—</div></td>
+                  <td class="sys-cell"><div class="sys-cell-inner">
+                    <span class="sys-role-badge">Teams Administrator</span>
+                    <div class="matrix-action-row">
+                      <button class="mat-approve-btn" onclick="matrixAction(this,'approve')">✓ Approve</button>
+                      <button class="mat-revoke-btn" onclick="matrixAction(this,'revoke')">✕ Revoke</button>
+                    </div>
+                    <input type="text" class="mat-comment" placeholder="Comment..." />
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="footer">Access Review Management System — UAR Portal v2.1</div>
       </div>
     </div>
 
-    <div class="footer">
-      Access Review Management System - UAR Portal
-    </div>
+  </main>
+</div>
 
+<!-- Modals -->
+<div id="allSystemsModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-top">
+      <div class="modal-top-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <h3>Cannot Submit from All Systems</h3>
+    </div>
+    <div class="modal-body"><p>กรุณาเลือก review ทีละระบบ ไม่สามารถ Submit จาก All Systems ได้</p></div>
+    <div class="modal-footer"><button class="btn-primary" onclick="closeAllSystemsModal()">OK, Got it</button></div>
   </div>
+</div>
 
-  <script>
+<div id="confirmModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-top">
+      <div class="modal-top-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <h3>Confirm Review Submission</h3>
+    </div>
+    <div class="modal-body"><p>ไม่มีการเปลี่ยนแปลงรายการ<br/>ต้องการ Submit Review ทั้งหมดหรือไม่?</p></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+      <button class="btn-primary" onclick="confirmSubmitAll()">Confirm Submit</button>
+    </div>
+  </div>
+</div>
 
-    let currentTab = 'ERP';
+<script>
+  // ── NAVIGATION ──
+  function navigateTo(page) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item[id^="nav-"]').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.getElementById('nav-' + page).classList.add('active');
+  }
 
-    function showTab(systemName) {
-      console.log('Current Tab:', systemName);
+  // ── PAGE 1: ACCESS REVIEW ──
+  const SYSTEMS = ['ERP','VPN','SAP','M365'];
+  let currentTab = 'ERP';
 
-      currentTab = systemName;
+  function showTab(name) {
+    currentTab = name;
+    document.querySelectorAll('.system-tab').forEach(t => t.style.display = 'none');
+    document.querySelectorAll('.sys-tab-btn').forEach(b => b.classList.remove('active'));
+    if (name === 'ALL') { SYSTEMS.forEach(s => { const t = document.getElementById(s); if(t) t.style.display='block'; }); }
+    else { const t = document.getElementById(name); if(t) t.style.display='block'; }
+    document.querySelectorAll(`.sys-tab-btn[data-system="${name}"]`).forEach(b => b.classList.add('active'));
+  }
 
-      const tabs = document.querySelectorAll('.system-tab');
+  function toggleRevoke(btn) {
+    const row = btn.closest('tr');
+    if (btn.classList.contains('revoke-active')) { btn.classList.remove('revoke-active'); btn.innerText='No Action'; row.classList.remove('revoke-row'); }
+    else { btn.classList.add('revoke-active'); btn.innerText='Mark Remove'; row.classList.add('revoke-row'); }
+    updateAll(); saveDraft();
+  }
+  function onCommentChange() { updateAll(); saveDraft(); }
+  function updateAll() { updateCounter(); updateBadges(); updateProgress(); }
 
-      tabs.forEach(tab => {
-        tab.style.display = 'none';
-      });
-
-      if (systemName === 'ALL') {
-        tabs.forEach(tab => {
-          tab.style.display = 'block';
-        });
-      } else {
-        const selectedTab = document.getElementById(systemName);
-
-        if (selectedTab) {
-          selectedTab.style.display = 'block';
-        }
-      }
-    }
-
-    function saveDraft() {
-      const draftData = {};
-
-      document.querySelectorAll('.system-tab').forEach(system => {
-        const systemId = system.id;
-        draftData[systemId] = [];
-
-        const rows = system.querySelectorAll('tbody tr');
-
-        rows.forEach((row, index) => {
-          const revoke = row.querySelector('.revoke-btn')
-            .classList.contains('revoke-active');
-
-          const comment = row.querySelector('.comment-box').value;
-
-          draftData[systemId].push({
-            rowIndex: index,
-            revoke,
-            comment
-          });
-        });
-      });
-
-      localStorage.setItem('uarDraftData', JSON.stringify(draftData));
-
-      const now = new Date();
-      const timeText = now.toLocaleTimeString();
-
-      document.getElementById('draftStatus').innerText =
-        'Draft Saved • ' + timeText;
-    }
-
-    function loadDraft() {
-      const draft = localStorage.getItem('uarDraftData');
-
-      if (!draft) {
-        return;
-      }
-
-      const draftData = JSON.parse(draft);
-
-      Object.keys(draftData).forEach(systemId => {
-        const system = document.getElementById(systemId);
-
-        if (!system) {
-          return;
-        }
-
-        const rows = system.querySelectorAll('tbody tr');
-
-        draftData[systemId].forEach(item => {
-          const row = rows[item.rowIndex];
-
-          if (!row) {
-            return;
-          }
-
-          const button = row.querySelector('.revoke-btn');
-          const commentBox = row.querySelector('.comment-box');
-
-          commentBox.value = item.comment || '';
-
-          if (item.revoke) {
-            button.classList.add('revoke-active');
-            button.innerText = 'Mark Remove';
-            row.classList.add('revoke-row');
-          }
-        });
-      });
-
-      updateCounter();
-      saveDraft();
-
-      document.getElementById('draftStatus').innerText =
-        'Draft Restored';
-    }
-
-    function toggleRevoke(button) {
-      const row = button.closest('tr');
-
-      if (button.classList.contains('revoke-active')) {
-        button.classList.remove('revoke-active');
-        button.innerText = 'No Action';
-        row.classList.remove('revoke-row');
-      } else {
-        button.classList.add('revoke-active');
-        button.innerText = 'Mark Remove';
-        row.classList.add('revoke-row');
-      }
-
-      updateCounter();
-    }
-
-    document.querySelectorAll('.comment-box').forEach(box => {
-      box.addEventListener('input', () => {
-        saveDraft();
-        updateCounter();
-      });
+  function updateCounter() {
+    let count = 0;
+    document.querySelectorAll('#page-access tbody tr').forEach(row => {
+      if (row.querySelector('.revoke-btn').classList.contains('revoke-active') || row.querySelector('.comment-box').value.trim()) count++;
     });
+    document.getElementById('counterNum').innerText = count;
+    document.getElementById('reviewCounter').classList.toggle('zero', count === 0);
+  }
 
-    window.addEventListener('beforeunload', function (e) {
-      saveDraft();
+  function updateBadges() {
+    SYSTEMS.forEach(s => {
+      const tab = document.getElementById(s);
+      const badge = document.getElementById('badge-' + s);
+      const btn = document.querySelector(`.sys-tab-btn[data-system="${s}"]`);
+      if (!tab || !badge) return;
+      let pending = 0;
+      tab.querySelectorAll('tbody tr').forEach(row => { if (!row.classList.contains('submitted-row')) pending++; });
+      badge.innerText = pending === 0 ? '✓' : pending;
+      if (btn) btn.classList.toggle('complete', pending === 0);
     });
+  }
 
-    function updateCounter() {
-      const rows = document.querySelectorAll('tbody tr');
-      let count = 0;
+  function updateProgress() {
+    const total = document.querySelectorAll('#page-access tbody tr').length;
+    const done  = document.querySelectorAll('#page-access tbody tr.submitted-row').length;
+    const pct = total === 0 ? 0 : Math.round((done/total)*100);
+    document.getElementById('progressPct').innerText = pct + '%';
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
 
-      rows.forEach(row => {
-        const revoke = row.querySelector('.revoke-btn')
-          .classList.contains('revoke-active');
+  function completeRows(targetRows) {
+    targetRows.forEach(row => {
+      const btn = row.querySelector('.revoke-btn'), commentBox = row.querySelector('.comment-box');
+      const revoked = btn.classList.contains('revoke-active');
+      row.classList.remove('revoke-row'); row.classList.add('submitted-row');
+      btn.disabled = true; commentBox.disabled = true;
+      if (revoked) { btn.innerText='Marked Remove'; btn.style.cssText='background:#fee2e2;color:#b91c1c;border-color:#fca5a5;'; }
+      else { btn.innerText='Reviewed ✓'; btn.style.cssText='background:#dcfce7;color:#15803d;border-color:#86efac;'; }
+    });
+    updateAll();
+  }
 
-        const comment = row.querySelector('.comment-box').value.trim();
+  function submitReview() {
+    if (currentTab==='ALL') { document.getElementById('allSystemsModal').style.display='flex'; return; }
+    const tab = document.getElementById(currentTab); if (!tab) return;
+    const rows = tab.querySelectorAll('tbody tr');
+    let hasAction = false;
+    rows.forEach(row => { if (row.querySelector('.revoke-btn').classList.contains('revoke-active') || row.querySelector('.comment-box').value.trim()) hasAction=true; });
+    if (!hasAction) { document.getElementById('confirmModal').style.display='flex'; return; }
+    completeRows(rows); localStorage.removeItem('uarDraftData');
+    document.getElementById('draftStatusText').innerText='Submitted'; alert('Review submitted successfully!');
+  }
 
-        if (revoke || comment !== '') {
-          count++;
-        }
+  function confirmSubmitAll() {
+    closeConfirmModal();
+    const tab = document.getElementById(currentTab); if (!tab) return;
+    completeRows(tab.querySelectorAll('tbody tr')); localStorage.removeItem('uarDraftData');
+    document.getElementById('draftStatusText').innerText='Submitted'; alert('Review submitted successfully!');
+  }
+
+  function closeAllSystemsModal() { document.getElementById('allSystemsModal').style.display='none'; }
+  function closeConfirmModal()    { document.getElementById('confirmModal').style.display='none'; }
+
+  function sortCurrentTab(by) {
+    const map = {empid:0, name:1, section:2};
+    const tabs = currentTab==='ALL' ? SYSTEMS.map(s=>document.getElementById(s)).filter(Boolean) : [document.getElementById(currentTab)].filter(Boolean);
+    tabs.forEach(t => {
+      const tbody = t.querySelector('tbody'), rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort((a,b) => a.cells[map[by]].innerText.localeCompare(b.cells[map[by]].innerText));
+      rows.forEach(r => tbody.appendChild(r));
+    });
+  }
+
+  function filterTable() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#page-access tbody tr').forEach(row => { row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none'; });
+  }
+
+  function saveDraft() {
+    const bar = document.getElementById('draftStatusBar');
+    bar.classList.add('saved');
+    document.getElementById('draftStatusText').innerText = 'Saved ' + new Date().toLocaleTimeString();
+  }
+
+  // ── PAGE 2: MATRIX ──
+  function toggleDept(id) {
+    const group = document.getElementById('dept-' + id);
+    if (group) group.classList.toggle('collapsed');
+  }
+
+  function matrixAction(btn, type) {
+    const inner = btn.closest('.sys-cell-inner');
+    const approveBtn = inner.querySelector('.mat-approve-btn');
+    const revokeBtn  = inner.querySelector('.mat-revoke-btn');
+    const row = btn.closest('tr');
+
+    if (type === 'approve') {
+      const already = approveBtn.classList.contains('selected');
+      approveBtn.classList.toggle('selected', !already);
+      revokeBtn.classList.remove('selected');
+      row.classList.remove('mat-row-revoked');
+      if (!already) row.classList.add('mat-row-approved');
+      else row.classList.remove('mat-row-approved');
+    } else {
+      const already = revokeBtn.classList.contains('selected');
+      revokeBtn.classList.toggle('selected', !already);
+      approveBtn.classList.remove('selected');
+      row.classList.remove('mat-row-approved');
+      if (!already) row.classList.add('mat-row-revoked');
+      else row.classList.remove('mat-row-revoked');
+    }
+    updateMatrixProgress();
+  }
+
+  function updateMatrixProgress() {
+    const rows = document.querySelectorAll('#page-matrix .mat-row');
+    let reviewed = 0;
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('.sys-cell-inner');
+      let rowDone = true;
+      if (cells.length === 0) { reviewed++; return; }
+      cells.forEach(cell => {
+        const approved = cell.querySelector('.mat-approve-btn')?.classList.contains('selected');
+        const revoked  = cell.querySelector('.mat-revoke-btn')?.classList.contains('selected');
+        if (!approved && !revoked) rowDone = false;
       });
+      if (rowDone) reviewed++;
+    });
+    document.getElementById('matProgressText').innerText = reviewed + ' / ' + rows.length;
+  }
 
-      document.getElementById('reviewCounter').innerText =
-        'Pending Review: ' + count + ' รายการ';
-    }
+  function filterMatrix(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#page-matrix .mat-row').forEach(row => {
+      row.style.display = row.getAttribute('data-emp').toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
 
-    function completeRows(targetRows) {
-      targetRows.forEach(row => {
-        const button = row.querySelector('.revoke-btn');
-        const commentBox = row.querySelector('.comment-box');
-        const revoke = button.classList.contains('revoke-active');
+  function filterDept(dept) {
+    document.querySelectorAll('#page-matrix .dept-group').forEach(group => {
+      group.style.display = (dept === 'ALL' || group.getAttribute('data-dept') === dept) ? '' : 'none';
+    });
+  }
 
-        row.classList.remove('revoke-row');
-        row.classList.add('submitted-row');
+  function submitMatrix() {
+    alert('Matrix review submitted successfully!');
+  }
 
-        button.disabled = true;
-        commentBox.disabled = true;
-
-        if (revoke) {
-          button.innerText = 'Marked Remove';
-          button.style.background = '#c50f1f';
-          button.style.color = 'white';
-        } else {
-          button.innerText = 'Reviewed';
-          button.style.background = '#107c10';
-          button.style.color = 'white';
-        }
-      });
-
-      updateSystemTabStatus();
-
-    loadDraft();
-    }
-
-    function submitReview() {
-      console.log('Submit Current Tab:', currentTab);
-
-      if (currentTab === 'ALL') {
-        document.getElementById('allSystemsModal').style.display = 'flex';
-        return;
-      }
-
-      const visibleTab = document.getElementById(currentTab);
-
-      if (!visibleTab) {
-        return;
-      }
-
-      const rows = visibleTab.querySelectorAll('tbody tr');
-      let hasAction = false;
-
-      rows.forEach(row => {
-        const revoke = row.querySelector('.revoke-btn')
-          .classList.contains('revoke-active');
-
-        const comment = row.querySelector('.comment-box').value.trim();
-
-        if (revoke || comment !== '') {
-          hasAction = true;
-        }
-      });
-
-      if (!hasAction) {
-        document.getElementById('confirmModal').style.display = 'flex';
-        return;
-      }
-
-      completeRows(rows);
-
-      localStorage.removeItem('uarDraftData');
-      document.getElementById('draftStatus').innerText = 'Draft cleared';
-
-      window.alert('Review submitted successfully');
-    }
-
-    function confirmSubmitAll() {
-      document.getElementById('confirmModal').style.display = 'none';
-
-      if (currentTab === 'ALL') {
-        window.alert('กรุณาเลือก review ทีละระบบ ไม่สามารถ Submit จาก ALL SYSTEMS ได้');
-        return;
-      }
-
-      const visibleTab = document.getElementById(currentTab);
-
-      if (!visibleTab) {
-        return;
-      }
-
-      const rows = visibleTab.querySelectorAll('tbody tr');
-
-      completeRows(rows);
-
-      localStorage.removeItem('uarDraftData');
-      document.getElementById('draftStatus').innerText = 'Draft cleared';
-
-      window.alert('Review submitted successfully');
-    }
-
-    function closeAllSystemsModal() {
-      document.getElementById('allSystemsModal').style.display = 'none';
-    }
-
-    function closeConfirmModal() {
-      document.getElementById('confirmModal').style.display = 'none';
-    }
-
-    function sortCurrentTab(sortBy) {
-      const visibleTab = Array.from(document.querySelectorAll('.system-tab'))
-        .find(tab => tab.style.display !== 'none');
-
-      if (!visibleTab) {
-        return;
-      }
-
-      const systemName = visibleTab.id;
-      sortTable(systemName, sortBy);
-    }
-
-    function sortTable(systemName, sortBy) {
-      const visibleTab = document.getElementById(systemName);
-
-      if (!visibleTab) {
-        return;
-      }
-
-      const tbody = visibleTab.querySelector('tbody');
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-
-      const columnIndexMap = {
-        empid: 0,
-        name: 1,
-        section: 2
-      };
-
-      const columnIndex = columnIndexMap[sortBy];
-
-      rows.sort((a, b) => {
-        const textA = a.cells[columnIndex].innerText.toLowerCase();
-        const textB = b.cells[columnIndex].innerText.toLowerCase();
-
-        return textA.localeCompare(textB);
-      });
-
-      rows.forEach(row => tbody.appendChild(row));
-    }
-
-    function filterTable() {
-      const input = document
-        .getElementById('searchInput')
-        .value
-        .toLowerCase();
-
-      const rows = document.querySelectorAll('tbody tr');
-
-      rows.forEach(row => {
-        const text = row.innerText.toLowerCase();
-
-        if (text.includes(input)) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
-      });
-    }
-
-    function updateSystemTabStatus() {
-      const systems = document.querySelectorAll('.system-tab');
-
-      systems.forEach(system => {
-        const rows = system.querySelectorAll('tbody tr');
-        let completed = true;
-
-        rows.forEach(row => {
-          if (!row.classList.contains('submitted-row')) {
-            completed = false;
-          }
-        });
-
-        const systemId = system.id;
-
-        document.querySelectorAll('.system-tab-btn').forEach(btn => {
-          const buttonSystem = btn.getAttribute('data-system');
-
-          if (buttonSystem === systemId && completed) {
-            btn.classList.add('system-complete');
-
-            if (!btn.innerText.startsWith('✓')) {
-              btn.innerText = '✓ ' + btn.innerText;
-            }
-          }
-        });
-      });
-    }
-
-  </script>
-
+  window.addEventListener('beforeunload', saveDraft);
+  updateAll();
+  updateMatrixProgress();
+</script>
 </body>
 </html>
